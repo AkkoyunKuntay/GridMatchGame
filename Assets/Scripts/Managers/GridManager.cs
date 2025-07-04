@@ -1,34 +1,112 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-   [SerializeField] private int _width;
-   [SerializeField] private int _height;
-   [SerializeField] private GameObject nodePrefab;
-    [SerializeField] private SpriteRenderer boardPrefab;
+    [Header("Grid Settings")]
+    [SerializeField, Min(1)] int width = 5;
+    [SerializeField, Min(1)] int height = 5;
 
-    private void Start()
+    [Header("Pool")]
+    [SerializeField, Range(1, 100)] int prewarmCount = 15;
+    readonly List<GameObject> pool = new();
+
+    [Header("Grid References")]
+    [SerializeField] Transform nodeContainer;
+    [SerializeField] GameObject nodePrefab;
+    [SerializeField] SpriteRenderer boardPrefab;
+    SpriteRenderer board;
+
+    void Awake()
     {
-        GenerateGrid();
+        if (nodeContainer == null)
+        {
+            nodeContainer = new GameObject("NodeContainer").transform;
+            nodeContainer.SetParent(transform, false);
+        }
+
+        
+        pool.Clear();
+        foreach (Transform child in nodeContainer)
+        {
+            child.gameObject.SetActive(false);   
+            pool.Add(child.gameObject);
+        }
     }
 
-    private void GenerateGrid()
+    public void PrewarmPool()
     {
-        for (int x = 0; x < _width; x++)
+        while (pool.Count < prewarmCount)
         {
-            for (int y = 0; y < _height; y++)
+            var go = Instantiate(nodePrefab, nodeContainer);
+            go.SetActive(false);
+            pool.Add(go);
+        }
+
+        if (pool.Count > prewarmCount)
+        {
+            foreach (var c in pool)
+                if (c.activeSelf)
+                {
+                    Debug.LogWarning("Pool shrink blocked: grid is active. ClearGrid first.");
+                    return;
+                }
+
+            for (int i = pool.Count - 1; i >= prewarmCount; i--)
             {
-                Vector2 pos = new Vector2(x, y);
-                GameObject node = Instantiate(nodePrefab, pos, Quaternion.identity);
+                if (Application.isPlaying) Destroy(pool[i]);
+                else DestroyImmediate(pool[i]);
+                pool.RemoveAt(i);
+            }
+        }
+    }
+
+    public void GenerateGrid()
+    {
+        int needed = width * height;
+
+        if (pool.Count < needed)
+        {
+            Debug.LogWarning($"Pool too small (need {needed}, have {pool.Count}). " +
+                             "Instantiating and pooling missing nodes.");
+            while (pool.Count < needed)
+            {
+                var go = Instantiate(nodePrefab, nodeContainer);
+                go.SetActive(false);
+                pool.Add(go);
             }
         }
 
-        Vector2 gridCenter = new Vector2((float)_width / 2 - 0.5f, (float)_height / 2 - 0.5f);
-        var board = Instantiate(boardPrefab, gridCenter, Quaternion.identity);
-        board.size = new Vector2(_width, _height);
+        ClearGrid(false);
 
-        Camera.main.transform.position = new Vector3(gridCenter.x, gridCenter.y, -10f);
+        int index = 0;
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++, index++)
+            {
+                var cell = pool[index];
+                cell.transform.localPosition = new Vector3(x, y);
+                cell.SetActive(true);
+            }
+        for (; index < pool.Count; index++)        
+            pool[index].SetActive(false);
+
+        Vector2 center = new(width * .5f - .5f, height * .5f - .5f);
+
+        if (board == null)
+            board = Instantiate(boardPrefab, transform);
+        board.size = new Vector2(width, height);
+        board.transform.position = center;
+        board.gameObject.SetActive(true);
+
+        var cam = Camera.main;
+        if (cam) cam.transform.position = new Vector3(center.x, center.y, cam.transform.position.z);
     }
+
+    public void ClearGrid(bool hideBoard = true)
+    {
+        if (pool.Count <= 0) return;
+        foreach (var c in pool) c.SetActive(false);
+        if (hideBoard && board) board.gameObject.SetActive(false);
+    }
+
 }
