@@ -16,7 +16,7 @@ public class GridManagerEditor : Editor
             // Pool Ready
             if (GUILayout.Button("PreWarm Pool"))
             {
-                gridManager.PrewarmPool();
+                gridManager.PrewarmPool(gridManager.prewarmCount);
                 MarkSceneDirty();
             }
         }
