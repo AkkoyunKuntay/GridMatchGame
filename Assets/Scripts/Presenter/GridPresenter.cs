@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class GridPresenter : MonoBehaviour
 {
+    [SerializeField] ScoreService scoreService; // TODO: will be injected later.
+
     NodeView[,] grid;
     int w, h;
 
@@ -39,6 +41,7 @@ public class GridPresenter : MonoBehaviour
         {
             foreach (var n in visited) n.SetMarked(false);
             Debug.Log($"Match cleared: {visited.Count} nodes");
+            scoreService.RegisterMatch();
         }
     }
 
