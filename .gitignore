@@ -15,6 +15,7 @@ sysinfo.txt
 Thumbs.db
 
 # === IDE ve editörler ===
+.vs/
 .vscode/
 .idea/
 *.code-workspace
