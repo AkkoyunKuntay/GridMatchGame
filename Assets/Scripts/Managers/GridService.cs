@@ -75,6 +75,12 @@ public class GridService : MonoBehaviour
     }
     public void GenerateGrid()
     {
+        if (board != null)
+        {
+            Destroy(board.gameObject);
+            board = null;
+        }
+
         int need = width * height;
         while (pool.Count < need)
         {
