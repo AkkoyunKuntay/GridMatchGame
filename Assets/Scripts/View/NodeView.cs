@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Zenject;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D))]
 public class NodeView : MonoBehaviour
@@ -7,7 +8,7 @@ public class NodeView : MonoBehaviour
     [SerializeField] Sprite xSprite;
 
     SpriteRenderer sr;
-    GridPresenter presenter;
+    [Inject] GridPresenter presenter;
     public bool IsMarked { get; private set; }
 
     void Awake()

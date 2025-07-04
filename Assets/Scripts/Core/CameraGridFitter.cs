@@ -1,9 +1,10 @@
 using UnityEngine;
+using Zenject;
 
 [RequireComponent(typeof(Camera))]
 public class CameraGridFitter : MonoBehaviour
 {
-    [SerializeField] private GridManager gridManager;
+    [Inject] private GridService gridManager;
     [SerializeField] private float padding = 0.5f;
 
     private Camera _cam;

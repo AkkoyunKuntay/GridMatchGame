@@ -2,14 +2,14 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(GridManager))]
+[CustomEditor(typeof(GridService))]
 public class GridManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        var gridManager = (GridManager)target;
+        var gridManager = (GridService)target;
         EditorGUILayout.Space(4);
         using (new EditorGUILayout.VerticalScope())
         {

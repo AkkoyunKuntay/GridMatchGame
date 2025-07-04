@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class GridPresenter : MonoBehaviour
 {
-    [SerializeField] ScoreService scoreService; // TODO: will be injected later.
+    [Inject] ScoreService scoreService; 
 
     NodeView[,] grid;
     int w, h;
@@ -39,7 +40,7 @@ public class GridPresenter : MonoBehaviour
 
         if (visited.Count >= 3)
         {
-            foreach (var n in visited) n.SetMarked(false);
+            foreach (var nodes in visited) nodes.SetMarked(false);
             Debug.Log($"Match cleared: {visited.Count} nodes");
             scoreService.RegisterMatch();
         }
